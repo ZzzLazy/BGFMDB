@@ -63,7 +63,7 @@ NSString* bg_sqlKey(NSString* key){
 NSString* bg_sqlValue(id value){
     
     if([value isKindOfClass:[NSNumber class]]) {
-        return value;
+        return [NSString stringWithFormat:@"%@",value];
     }else if([value isKindOfClass:[NSString class]]){
         return [NSString stringWithFormat:@"'%@'",value];
     }else{
@@ -704,7 +704,8 @@ void bg_cleanCache(){
         NSString* sqlKey = valueDictKeys[i];
         NSString* tempSqlKey = sqlKey;
         if([sqlKey containsString:BG]){
-            tempSqlKey = [sqlKey stringByReplacingOccurrencesOfString:BG withString:@""];
+            NSString *extractedExpr = BG;
+            tempSqlKey = [sqlKey stringByReplacingOccurrencesOfString:extractedExpr withString:@""];
         }
         for(NSString* keyAndType in keyAndTypes){
             NSArray* arrKT = [keyAndType componentsSeparatedByString:@"*"];

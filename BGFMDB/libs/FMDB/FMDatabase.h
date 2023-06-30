@@ -115,7 +115,7 @@ typedef int(^FMDBExecuteStatementsCallbackBlock)(NSDictionary *resultsDictionary
 
  Or, in iOS, you might open a database in the app's `Documents` directory:
 
-    NSString *docsPath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES)[0];
+    NSString *docsPath = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES)[0];
     NSString *dbPath   = [docsPath stringByAppendingPathComponent:@"test.db"];
     FMDatabase *db     = [FMDatabase databaseWithPath:dbPath];
 
@@ -142,7 +142,7 @@ typedef int(^FMDBExecuteStatementsCallbackBlock)(NSDictionary *resultsDictionary
  
  Or, in iOS, you might open a database in the app's `Documents` directory:
  
-    NSString *docsPath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES)[0];
+    NSString *docsPath = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES)[0];
     NSString *dbPath   = [docsPath stringByAppendingPathComponent:@"test.db"];
     FMDatabase *db     = [FMDatabase databaseWithPath:dbPath];
  
@@ -170,7 +170,7 @@ typedef int(^FMDBExecuteStatementsCallbackBlock)(NSDictionary *resultsDictionary
 
  Or, in iOS, you might open a database in the app's `Documents` directory:
 
-    NSString *docsPath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES)[0];
+    NSString *docsPath = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES)[0];
     NSString *dbPath   = [docsPath stringByAppendingPathComponent:@"test.db"];
     FMDatabase *db     = [FMDatabase databaseWithPath:dbPath];
 
@@ -197,7 +197,7 @@ typedef int(^FMDBExecuteStatementsCallbackBlock)(NSDictionary *resultsDictionary
  
  Or, in iOS, you might open a database in the app's `Documents` directory:
  
- NSString *docsPath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES)[0];
+ NSString *docsPath = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES)[0];
  NSString *dbPath   = [docsPath stringByAppendingPathComponent:@"test.db"];
  FMDatabase *db     = [FMDatabase databaseWithPath:dbPath];
  

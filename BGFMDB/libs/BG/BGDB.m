@@ -21,7 +21,7 @@ if(self.debug){bg_log(@"调试输出: %@",param);}\
 
 #define MaxQueryPageNum 50
 
-#define CachePath(name) [[NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject] stringByAppendingPathComponent:name]
+#define CachePath(name) [[NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES) lastObject] stringByAppendingPathComponent:name]
 
 static const void * const BGFMDBDispatchQueueSpecificKey = &BGFMDBDispatchQueueSpecificKey;
 
@@ -1272,6 +1272,9 @@ static BGDB* BGdb = nil;
     __block BOOL recordSuccess = NO;
     __weak typeof(self) BGSelf = self;
     NSInteger count = [self countQueueForTable:A where:nil];
+    if (count == 0) {
+        recordSuccess = YES;
+    }
     for(NSInteger i=0;i<count;i+=MaxQueryPageNum){
         @autoreleasepool{//由于查询出来的数据量可能巨大,所以加入自动释放池.
             NSString* param = [NSString stringWithFormat:@"limit %@,%@",@(i),@(MaxQueryPageNum)];

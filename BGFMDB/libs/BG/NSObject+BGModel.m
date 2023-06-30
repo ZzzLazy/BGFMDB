@@ -276,6 +276,7 @@
         tablename = NSStringFromClass([self class]);
     }
     __block NSArray* results;
+    if (![[BGDB shareManager] bg_isExistWithTableName:tablename]) {return @[];}
     [[BGDB shareManager] queryWithTableName:tablename conditions:where complete:^(NSArray * _Nullable array) {
         results = [BGTool tansformDataFromSqlDataWithTableName:tablename class:[self class] array:array];
     }];
