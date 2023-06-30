@@ -1,6 +1,6 @@
 //
 //  NSCache+BGCache.m
-//  BGFMDB
+//  BGZLDB
 //
 //  Created by biao on 2017/10/17.
 //  Copyright © 2017年 Biao. All rights reserved.

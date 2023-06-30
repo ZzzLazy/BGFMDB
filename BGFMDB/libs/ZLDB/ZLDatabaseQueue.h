@@ -1,5 +1,5 @@
 //
-//  FMDatabaseQueue.h
+//  ZLDatabaseQueue.h
 //  fmdb
 //
 //  Created by August Mueller on 6/22/11.
@@ -10,26 +10,26 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@class FMDatabase;
+@class ZLDatabase;
 
-/** To perform queries and updates on multiple threads, you'll want to use `FMDatabaseQueue`.
+/** To perform queries and updates on multiple threads, you'll want to use `ZLDatabaseQueue`.
 
- Using a single instance of `<FMDatabase>` from multiple threads at once is a bad idea.  It has always been OK to make a `<FMDatabase>` object *per thread*.  Just don't share a single instance across threads, and definitely not across multiple threads at the same time.
+ Using a single instance of `<ZLDatabase>` from multiple threads at once is a bad idea.  It has always been OK to make a `<ZLDatabase>` object *per thread*.  Just don't share a single instance across threads, and definitely not across multiple threads at the same time.
 
- Instead, use `FMDatabaseQueue`. Here's how to use it:
+ Instead, use `ZLDatabaseQueue`. Here's how to use it:
 
  First, make your queue.
 
-    FMDatabaseQueue *queue = [FMDatabaseQueue databaseQueueWithPath:aPath];
+    ZLDatabaseQueue *queue = [ZLDatabaseQueue databaseQueueWithPath:aPath];
 
  Then use it like so:
 
-    [queue inDatabase:^(FMDatabase *db) {
+    [queue inDatabase:^(ZLDatabase *db) {
         [db executeUpdate:@"INSERT INTO myTable VALUES (?)", [NSNumber numberWithInt:1]];
         [db executeUpdate:@"INSERT INTO myTable VALUES (?)", [NSNumber numberWithInt:2]];
         [db executeUpdate:@"INSERT INTO myTable VALUES (?)", [NSNumber numberWithInt:3]];
 
-        FMResultSet *rs = [db executeQuery:@"select * from foo"];
+        ZLResultSet *rs = [db executeQuery:@"select * from foo"];
         while ([rs next]) {
             //…
         }
@@ -37,7 +37,7 @@ NS_ASSUME_NONNULL_BEGIN
 
  An easy way to wrap things up in a transaction can be done like this:
 
-    [queue inTransaction:^(FMDatabase *db, BOOL *rollback) {
+    [queue inTransaction:^(ZLDatabase *db, BOOL *rollback) {
         [db executeUpdate:@"INSERT INTO myTable VALUES (?)", [NSNumber numberWithInt:1]];
         [db executeUpdate:@"INSERT INTO myTable VALUES (?)", [NSNumber numberWithInt:2]];
         [db executeUpdate:@"INSERT INTO myTable VALUES (?)", [NSNumber numberWithInt:3]];
@@ -50,19 +50,19 @@ NS_ASSUME_NONNULL_BEGIN
         [db executeUpdate:@"INSERT INTO myTable VALUES (?)", [NSNumber numberWithInt:4]];
     }];
 
- `FMDatabaseQueue` will run the blocks on a serialized queue (hence the name of the class).  So if you call `FMDatabaseQueue`'s methods from multiple threads at the same time, they will be executed in the order they are received.  This way queries and updates won't step on each other's toes, and every one is happy.
+ `ZLDatabaseQueue` will run the blocks on a serialized queue (hence the name of the class).  So if you call `ZLDatabaseQueue`'s methods from multiple threads at the same time, they will be executed in the order they are received.  This way queries and updates won't step on each other's toes, and every one is happy.
 
  ### See also
 
- - `<FMDatabase>`
+ - `<ZLDatabase>`
 
- @warning Do not instantiate a single `<FMDatabase>` object and use it across multiple threads. Use `FMDatabaseQueue` instead.
+ @warning Do not instantiate a single `<ZLDatabase>` object and use it across multiple threads. Use `ZLDatabaseQueue` instead.
  
- @warning The calls to `FMDatabaseQueue`'s methods are blocking.  So even though you are passing along blocks, they will **not** be run on another thread.
+ @warning The calls to `ZLDatabaseQueue`'s methods are blocking.  So even though you are passing along blocks, they will **not** be run on another thread.
 
  */
 
-@interface FMDatabaseQueue : NSObject
+@interface ZLDatabaseQueue : NSObject
 /** Path of database */
 
 @property (atomic, retain, nullable) NSString *path;
@@ -83,7 +83,7 @@ NS_ASSUME_NONNULL_BEGIN
  
  @param aPath The file path of the database.
  
- @return The `FMDatabaseQueue` object. `nil` on error.
+ @return The `ZLDatabaseQueue` object. `nil` on error.
  */
 
 + (instancetype)databaseQueueWithPath:(NSString * _Nullable)aPath;
@@ -92,7 +92,7 @@ NS_ASSUME_NONNULL_BEGIN
  
  @param url The file `NSURL` of the database.
  
- @return The `FMDatabaseQueue` object. `nil` on error.
+ @return The `ZLDatabaseQueue` object. `nil` on error.
  */
 
 + (instancetype)databaseQueueWithURL:(NSURL * _Nullable)url;
@@ -102,7 +102,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param aPath The file path of the database.
  @param openFlags Flags passed to the openWithFlags method of the database.
  
- @return The `FMDatabaseQueue` object. `nil` on error.
+ @return The `ZLDatabaseQueue` object. `nil` on error.
  */
 + (instancetype)databaseQueueWithPath:(NSString * _Nullable)aPath flags:(int)openFlags;
 
@@ -111,7 +111,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param url The file `NSURL` of the database.
  @param openFlags Flags passed to the openWithFlags method of the database.
  
- @return The `FMDatabaseQueue` object. `nil` on error.
+ @return The `ZLDatabaseQueue` object. `nil` on error.
  */
 + (instancetype)databaseQueueWithURL:(NSURL * _Nullable)url flags:(int)openFlags;
 
@@ -119,7 +119,7 @@ NS_ASSUME_NONNULL_BEGIN
  
  @param aPath The file path of the database.
  
- @return The `FMDatabaseQueue` object. `nil` on error.
+ @return The `ZLDatabaseQueue` object. `nil` on error.
  */
 
 - (instancetype)initWithPath:(NSString * _Nullable)aPath;
@@ -128,7 +128,7 @@ NS_ASSUME_NONNULL_BEGIN
  
  @param url The file `NSURL of the database.
  
- @return The `FMDatabaseQueue` object. `nil` on error.
+ @return The `ZLDatabaseQueue` object. `nil` on error.
  */
 
 - (instancetype)initWithURL:(NSURL * _Nullable)url;
@@ -138,7 +138,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param aPath The file path of the database.
  @param openFlags Flags passed to the openWithFlags method of the database.
  
- @return The `FMDatabaseQueue` object. `nil` on error.
+ @return The `ZLDatabaseQueue` object. `nil` on error.
  */
 
 - (instancetype)initWithPath:(NSString * _Nullable)aPath flags:(int)openFlags;
@@ -148,7 +148,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param url The file path of the database.
  @param openFlags Flags passed to the openWithFlags method of the database.
  
- @return The `FMDatabaseQueue` object. `nil` on error.
+ @return The `ZLDatabaseQueue` object. `nil` on error.
  */
 
 - (instancetype)initWithURL:(NSURL * _Nullable)url flags:(int)openFlags;
@@ -159,7 +159,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param openFlags Flags passed to the openWithFlags method of the database
  @param vfsName The name of a custom virtual file system
  
- @return The `FMDatabaseQueue` object. `nil` on error.
+ @return The `ZLDatabaseQueue` object. `nil` on error.
  */
 
 - (instancetype)initWithPath:(NSString * _Nullable)aPath flags:(int)openFlags vfs:(NSString * _Nullable)vfsName;
@@ -170,16 +170,16 @@ NS_ASSUME_NONNULL_BEGIN
  @param openFlags Flags passed to the openWithFlags method of the database
  @param vfsName The name of a custom virtual file system
  
- @return The `FMDatabaseQueue` object. `nil` on error.
+ @return The `ZLDatabaseQueue` object. `nil` on error.
  */
 
 - (instancetype)initWithURL:(NSURL * _Nullable)url flags:(int)openFlags vfs:(NSString * _Nullable)vfsName;
 
-/** Returns the Class of 'FMDatabase' subclass, that will be used to instantiate database object.
+/** Returns the Class of 'ZLDatabase' subclass, that will be used to instantiate database object.
  
- Subclasses can override this method to return specified Class of 'FMDatabase' subclass.
+ Subclasses can override this method to return specified Class of 'ZLDatabase' subclass.
  
- @return The Class of 'FMDatabase' subclass, that will be used to instantiate database object.
+ @return The Class of 'ZLDatabase' subclass, that will be used to instantiate database object.
  */
 
 + (Class)databaseClass;
@@ -198,24 +198,24 @@ NS_ASSUME_NONNULL_BEGIN
 
 /** Synchronously perform database operations on queue.
  
- @param block The code to be run on the queue of `FMDatabaseQueue`
+ @param block The code to be run on the queue of `ZLDatabaseQueue`
  */
 
-- (void)inDatabase:(__attribute__((noescape)) void (^)(FMDatabase *db))block;
+- (void)inDatabase:(__attribute__((noescape)) void (^)(ZLDatabase *db))block;
 
 /** Synchronously perform database operations on queue, using transactions.
 
- @param block The code to be run on the queue of `FMDatabaseQueue`
+ @param block The code to be run on the queue of `ZLDatabaseQueue`
  */
 
-- (void)inTransaction:(__attribute__((noescape)) void (^)(FMDatabase *db, BOOL *rollback))block;
+- (void)inTransaction:(__attribute__((noescape)) void (^)(ZLDatabase *db, BOOL *rollback))block;
 
 /** Synchronously perform database operations on queue, using deferred transactions.
 
- @param block The code to be run on the queue of `FMDatabaseQueue`
+ @param block The code to be run on the queue of `ZLDatabaseQueue`
  */
 
-- (void)inDeferredTransaction:(__attribute__((noescape)) void (^)(FMDatabase *db, BOOL *rollback))block;
+- (void)inDeferredTransaction:(__attribute__((noescape)) void (^)(ZLDatabase *db, BOOL *rollback))block;
 
 ///-----------------------------------------------
 /// @name Dispatching database operations to queue
@@ -223,12 +223,12 @@ NS_ASSUME_NONNULL_BEGIN
 
 /** Synchronously perform database operations using save point.
 
- @param block The code to be run on the queue of `FMDatabaseQueue`
+ @param block The code to be run on the queue of `ZLDatabaseQueue`
  */
 
 // NOTE: you can not nest these, since calling it will pull another database out of the pool and you'll get a deadlock.
-// If you need to nest, use FMDatabase's startSavePointWithName:error: instead.
-- (NSError * _Nullable)inSavePoint:(__attribute__((noescape)) void (^)(FMDatabase *db, BOOL *rollback))block;
+// If you need to nest, use ZLDatabase's startSavePointWithName:error: instead.
+- (NSError * _Nullable)inSavePoint:(__attribute__((noescape)) void (^)(ZLDatabase *db, BOOL *rollback))block;
 
 @end
 

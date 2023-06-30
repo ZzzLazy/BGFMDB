@@ -1,5 +1,5 @@
 //
-//  FMDatabaseAdditions.h
+//  ZLDatabaseAdditions.h
 //  fmdb
 //
 //  Created by August Mueller on 10/30/05.
@@ -7,18 +7,18 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "FMDatabase.h"
+#import "ZLDatabase.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-/** Category of additions for `<FMDatabase>` class.
+/** Category of additions for `<ZLDatabase>` class.
  
  ### See also
 
- - `<FMDatabase>`
+ - `<ZLDatabase>`
  */
 
-@interface FMDatabase (FMDatabaseAdditions)
+@interface ZLDatabase (ZLDatabaseAdditions)
 
 ///----------------------------------------
 /// @name Return results of SQL to variable
@@ -137,12 +137,12 @@ NS_ASSUME_NONNULL_BEGIN
  - `rootpage` - The page number of the root b-tree page for tables and indices
  - `sql` - The SQL that created the entity
 
- @return `FMResultSet` of schema; `nil` on error.
+ @return `ZLResultSet` of schema; `nil` on error.
  
  @see [SQLite File Format](http://www.sqlite.org/fileformat.html)
  */
 
-- (FMResultSet *)getSchema;
+- (ZLResultSet *)getSchema;
 
 /** The schema of the database.
 
@@ -161,12 +161,12 @@ NS_ASSUME_NONNULL_BEGIN
 
  @param tableName The name of the table for whom the schema will be returned.
  
- @return `FMResultSet` of schema; `nil` on error.
+ @return `ZLResultSet` of schema; `nil` on error.
  
  @see [table_info](http://www.sqlite.org/pragma.html#pragma_table_info)
  */
 
-- (FMResultSet*)getTableSchema:(NSString*)tableName;
+- (ZLResultSet*)getTableSchema:(NSString*)tableName;
 
 /** Test to see if particular column exists for particular table in database
  

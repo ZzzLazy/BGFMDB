@@ -1,19 +1,19 @@
 //
 //  NSObject+BGModel.h
-//  BGFMDB
+//  BGZLDB
 //
 //  Created by huangzhibiao on 17/2/28.
 //  Copyright © 2017年 Biao. All rights reserved.
 //  温馨提示，同步：线程阻塞；异步：线程非阻塞;
 /**
-BGFMDB全新升级->>
+BGZLDB全新升级->>
 完美支持:
 int,long,signed,float,double,NSInteger,CGFloat,BOOL,NSString,NSMutableString,NSNumber,
 NSArray,NSMutableArray,NSDictionary,NSMutableDictionary,NSMapTable,NSHashTable,NSData,
 NSMutableData,UIImage,NSDate,NSURL,NSRange,CGRect,CGSize,CGPoint,自定义对象 等的存储.
  */
 #import <Foundation/Foundation.h>
-#import "BGFMDBConfig.h"
+#import "BGZLDBConfig.h"
 
 @protocol BGProtocol <NSObject>
 //可选择操作
@@ -394,16 +394,16 @@ NSMutableData,UIImage,NSDate,NSURL,NSRange,CGRect,CGSize,CGPoint,自定义对象
 /**
  判断这个类的数据表是否已经存在.
  */
-+(BOOL)bg_isExist BGFMDBDeprecated("此方法已过期(能正常使用,但不建议使用)，使用bg_isExistForTableName:替代.");
++(BOOL)bg_isExist BGZLDBDeprecated("此方法已过期(能正常使用,但不建议使用)，使用bg_isExistForTableName:替代.");
 /**
  同步存入对象数组.
  @array 存放对象的数组.(数组中存放的是同一种类型的数据)
  */
-+(BOOL)bg_saveArray:(NSArray* _Nonnull)array BGFMDBDeprecated("此方法已过期(能正常使用,但不建议使用)，请使用bg_saveOrUpdateArray替代");
++(BOOL)bg_saveArray:(NSArray* _Nonnull)array BGZLDBDeprecated("此方法已过期(能正常使用,但不建议使用)，请使用bg_saveOrUpdateArray替代");
 /**
  同上条件异步.
  */
-+(void)bg_saveArrayAsync:(NSArray* _Nonnull)array complete:(bg_complete_B)complete BGFMDBDeprecated("此方法已过期(能正常使用,但不建议使用)，请使用bg_saveOrUpdateArray替代");
++(void)bg_saveArrayAsync:(NSArray* _Nonnull)array complete:(bg_complete_B)complete BGZLDBDeprecated("此方法已过期(能正常使用,但不建议使用)，请使用bg_saveOrUpdateArray替代");
 
 /**
  同步更新对象数组.
@@ -411,43 +411,43 @@ NSMutableData,UIImage,NSDate,NSURL,NSRange,CGRect,CGSize,CGPoint,自定义对象
  当类中定义了"唯一约束" 或 "主键"有值时,使用此API才有意义.
  提示：“唯一约束”优先级高于"主键".
  */
-+(BOOL)bg_updateArray:(NSArray* _Nonnull)array BGFMDBDeprecated("此方法已过期(能正常使用,但不建议使用)，请使用bg_saveOrUpdateArray替代");
++(BOOL)bg_updateArray:(NSArray* _Nonnull)array BGZLDBDeprecated("此方法已过期(能正常使用,但不建议使用)，请使用bg_saveOrUpdateArray替代");
 /**
  同上条件异步.
  */
-+(void)bg_updateArrayAsync:(NSArray* _Nonnull)array complete:(bg_complete_B)complete BGFMDBDeprecated("此方法已过期(能正常使用,但不建议使用)，请使用bg_saveOrUpdateArray替代");
++(void)bg_updateArrayAsync:(NSArray* _Nonnull)array complete:(bg_complete_B)complete BGZLDBDeprecated("此方法已过期(能正常使用,但不建议使用)，请使用bg_saveOrUpdateArray替代");
 /**
  同步存入对象数组.
  @array 存放对象的数组.(数组中存放的是同一种类型的数据)
  */
-+(BOOL)bg_saveArray:(NSArray* _Nonnull)array IgnoreKeys:(NSArray* const _Nullable)ignoreKeys BGFMDBDeprecated("此方法已过期(能正常使用,但不建议使用)，在模型的.m文件中实现bg_ignoreKeys函数即可");
++(BOOL)bg_saveArray:(NSArray* _Nonnull)array IgnoreKeys:(NSArray* const _Nullable)ignoreKeys BGZLDBDeprecated("此方法已过期(能正常使用,但不建议使用)，在模型的.m文件中实现bg_ignoreKeys函数即可");
 /**
  异步存入对象数组.
  @array 存放对象的数组.(数组中存放的是同一种类型的数据)
  */
-+(void)bg_saveArrayAsync:(NSArray* _Nonnull)array IgnoreKeys:(NSArray* const _Nullable)ignoreKeys complete:(bg_complete_B)complete BGFMDBDeprecated("此方法已过期(能正常使用,但不建议使用)，在模型的.m文件中实现bg_ignoreKeys函数即可");
++(void)bg_saveArrayAsync:(NSArray* _Nonnull)array IgnoreKeys:(NSArray* const _Nullable)ignoreKeys complete:(bg_complete_B)complete BGZLDBDeprecated("此方法已过期(能正常使用,但不建议使用)，在模型的.m文件中实现bg_ignoreKeys函数即可");
 /**
  同步存储.
  @ignoreKeys 忽略掉模型中的哪些key(即模型变量)不要存储.
  */
--(BOOL)bg_saveIgnoredKeys:(NSArray* const _Nonnull)ignoredKeys BGFMDBDeprecated("此方法已过期(能正常使用,但不建议使用)，在模型的.m文件中实现bg_ignoreKeys函数即可");
+-(BOOL)bg_saveIgnoredKeys:(NSArray* const _Nonnull)ignoredKeys BGZLDBDeprecated("此方法已过期(能正常使用,但不建议使用)，在模型的.m文件中实现bg_ignoreKeys函数即可");
 /**
  异步存储.
  @ignoreKeys 忽略掉模型中的哪些key(即模型变量)不要存储.
  */
--(void)bg_saveAsyncIgnoreKeys:(NSArray* const _Nonnull)ignoredKeys complete:(bg_complete_B)complete BGFMDBDeprecated("此方法已过期(能正常使用,但不建议使用)，在模型的.m文件中实现bg_ignoreKeys函数即可");
+-(void)bg_saveAsyncIgnoreKeys:(NSArray* const _Nonnull)ignoredKeys complete:(bg_complete_B)complete BGZLDBDeprecated("此方法已过期(能正常使用,但不建议使用)，在模型的.m文件中实现bg_ignoreKeys函数即可");
 /**
  同步覆盖存储.
  覆盖掉原来的数据,只存储当前的数据.
  @ignoreKeys 忽略掉模型中的哪些key(即模型变量)不要存储.
  */
--(BOOL)bg_coverIgnoredKeys:(NSArray* const _Nonnull)ignoredKeys BGFMDBDeprecated("此方法已过期(能正常使用,但不建议使用)，在模型的.m文件中实现bg_ignoreKeys函数即可");
+-(BOOL)bg_coverIgnoredKeys:(NSArray* const _Nonnull)ignoredKeys BGZLDBDeprecated("此方法已过期(能正常使用,但不建议使用)，在模型的.m文件中实现bg_ignoreKeys函数即可");
 /**
  异步覆盖存储.
  覆盖掉原来的数据,只存储当前的数据.
  @ignoreKeys 忽略掉模型中的哪些key(即模型变量)不要存储.
  */
--(void)bg_coverAsyncIgnoredKeys:(NSArray* const _Nonnull)ignoredKeys complete:(bg_complete_B)complete BGFMDBDeprecated("此方法已过期(能正常使用,但不建议使用)，在模型的.m文件中实现bg_ignoreKeys函数即可");
+-(void)bg_coverAsyncIgnoredKeys:(NSArray* const _Nonnull)ignoredKeys complete:(bg_complete_B)complete BGZLDBDeprecated("此方法已过期(能正常使用,但不建议使用)，在模型的.m文件中实现bg_ignoreKeys函数即可");
 /**
  同步更新数据.
  @where 条件数组，形式@[@"name",@"=",@"标哥",@"age",@"=>",@(25)],即更新name=标哥,age=>25的数据.
@@ -455,7 +455,7 @@ NSMutableData,UIImage,NSDate,NSURL,NSRange,CGRect,CGSize,CGPoint,自定义对象
  @ignoreKeys 忽略哪些key不用更新.
  不支持keypath的key,即嵌套的自定义类, 形式如@[@"user.name",@"=",@"习大大"]暂不支持(有专门的keyPath更新接口).
  */
--(BOOL)bg_updateWhere:(NSArray* _Nullable)where ignoreKeys:(NSArray* const _Nullable)ignoreKeys BGFMDBDeprecated("此方法已过期(能正常使用,但不建议使用)，在模型的.m文件中实现bg_ignoreKeys函数即可");
+-(BOOL)bg_updateWhere:(NSArray* _Nullable)where ignoreKeys:(NSArray* const _Nullable)ignoreKeys BGZLDBDeprecated("此方法已过期(能正常使用,但不建议使用)，在模型的.m文件中实现bg_ignoreKeys函数即可");
 /**
  @format 传入sql条件参数,语句来进行更新,方便开发者自由扩展.
  支持keyPath.
@@ -468,7 +468,7 @@ NSMutableData,UIImage,NSDate,NSURL,NSRange,CGRect,CGSize,CGPoint,自定义对象
  [p bg_updateFormatSqlConditions:conditions IgnoreKeys:nil];
  @ignoreKeys 忽略哪些key不用更新.
  */
--(BOOL)bg_updateFormatSqlConditions:(NSString* _Nonnull)conditions IgnoreKeys:(NSArray* const _Nullable)ignoreKeys BGFMDBDeprecated("此方法已过期(能正常使用,但不建议使用)，在模型的.m文件中实现bg_ignoreKeys函数即可");
+-(BOOL)bg_updateFormatSqlConditions:(NSString* _Nonnull)conditions IgnoreKeys:(NSArray* const _Nullable)ignoreKeys BGZLDBDeprecated("此方法已过期(能正常使用,但不建议使用)，在模型的.m文件中实现bg_ignoreKeys函数即可");
 @end
 
 #pragma mark 直接存储数组.

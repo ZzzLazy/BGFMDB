@@ -1,14 +1,14 @@
 //
 //  BGDB.h
-//  BGFMDB
+//  BGZLDB
 //
 //  Created by biao on 2017/10/18.
 //  Copyright © 2017年 Biao. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
-#import "BGFMDBConfig.h"
-#import "FMDB.h"
+#import "BGZLDBConfig.h"
+#import "ZLDB.h"
 
 @interface BGDB : NSObject
 //信号量.

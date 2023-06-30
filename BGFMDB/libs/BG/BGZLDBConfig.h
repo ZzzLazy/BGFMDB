@@ -1,16 +1,16 @@
 //
-//  BGFMDBConfig.h
-//  BGFMDB
+//  BGZLDBConfig.h
+//  BGZLDB
 //
 //  Created by biao on 2017/7/19.
 //  Copyright © 2017年 Biao. All rights reserved.
 //
 
-#ifndef BGFMDBConfig_h
-#define BGFMDBConfig_h
+#ifndef BGZLDBConfig_h
+#define BGZLDBConfig_h
 
 // 过期方法注释
-#define BGFMDBDeprecated(instead) NS_DEPRECATED(2_0, 2_0, 2_0, 2_0, instead)
+#define BGZLDBDeprecated(instead) NS_DEPRECATED(2_0, 2_0, 2_0, 2_0, instead)
 
 #define bg_primaryKey @"bg_id"
 #define bg_createTimeKey @"bg_createTime"
@@ -103,4 +103,4 @@ extern void bg_inTransaction(BOOL (^ _Nonnull block)());
  */
 extern void bg_cleanCache();
 
-#endif /* BGFMDBConfig_h */
+#endif /* BGZLDBConfig_h */

@@ -1,14 +1,14 @@
-#import "FMDatabase.h"
+#import "ZLDatabase.h"
 #import "unistd.h"
 #import <objc/runtime.h>
 
-#if FMDB_SQLITE_STANDALONE
+#if ZLDB_SQLITE_STANDALONE
 #import <sqlite3/sqlite3.h>
 #else
 #import <sqlite3.h>
 #endif
 
-@interface FMDatabase () {
+@interface ZLDatabase () {
     void*               _db;
     BOOL                _isExecutingStatement;
     NSTimeInterval      _startBusyRetryTime;
@@ -21,14 +21,14 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-- (FMResultSet * _Nullable)executeQuery:(NSString *)sql withArgumentsInArray:(NSArray * _Nullable)arrayArgs orDictionary:(NSDictionary * _Nullable)dictionaryArgs orVAList:(va_list)args;
+- (ZLResultSet * _Nullable)executeQuery:(NSString *)sql withArgumentsInArray:(NSArray * _Nullable)arrayArgs orDictionary:(NSDictionary * _Nullable)dictionaryArgs orVAList:(va_list)args;
 - (BOOL)executeUpdate:(NSString *)sql error:(NSError * _Nullable *)outErr withArgumentsInArray:(NSArray * _Nullable)arrayArgs orDictionary:(NSDictionary * _Nullable)dictionaryArgs orVAList:(va_list)args;
 
 NS_ASSUME_NONNULL_END
 
 @end
 
-@implementation FMDatabase
+@implementation ZLDatabase
 
 // Because these two properties have all of their accessor methods implemented,
 // we have to synthesize them to get the corresponding ivars. The rest of the
@@ -37,14 +37,14 @@ NS_ASSUME_NONNULL_END
 @synthesize shouldCacheStatements = _shouldCacheStatements;
 @synthesize maxBusyRetryTimeInterval = _maxBusyRetryTimeInterval;
 
-#pragma mark FMDatabase instantiation and deallocation
+#pragma mark ZLDatabase instantiation and deallocation
 
 + (instancetype)databaseWithPath:(NSString *)aPath {
-    return FMDBReturnAutoreleased([[self alloc] initWithPath:aPath]);
+    return ZLDBReturnAutoreleased([[self alloc] initWithPath:aPath]);
 }
 
 + (instancetype)databaseWithURL:(NSURL *)url {
-    return FMDBReturnAutoreleased([[self alloc] initWithURL:url]);
+    return ZLDBReturnAutoreleased([[self alloc] initWithURL:url]);
 }
 
 - (instancetype)init {
@@ -82,11 +82,11 @@ NS_ASSUME_NONNULL_END
 
 - (void)dealloc {
     [self close];
-    FMDBRelease(_openResultSets);
-    FMDBRelease(_cachedStatements);
-    FMDBRelease(_dateFormat);
-    FMDBRelease(_databasePath);
-    FMDBRelease(_openFunctions);
+    ZLDBRelease(_openResultSets);
+    ZLDBRelease(_cachedStatements);
+    ZLDBRelease(_dateFormat);
+    ZLDBRelease(_databasePath);
+    ZLDBRelease(_openFunctions);
     
 #if ! __has_feature(objc_arc)
     [super dealloc];
@@ -97,22 +97,22 @@ NS_ASSUME_NONNULL_END
     return _databasePath ? [NSURL fileURLWithPath:_databasePath] : nil;
 }
 
-+ (NSString*)FMDBUserVersion {
++ (NSString*)ZLDBUserVersion {
     return @"2.7.2";
 }
 
 // returns 0x0240 for version 2.4.  This makes it super easy to do things like:
-// /* need to make sure to do X with FMDB version 2.4 or later */
-// if ([FMDatabase FMDBVersion] >= 0x0240) { … }
+// /* need to make sure to do X with ZLDB version 2.4 or later */
+// if ([ZLDatabase ZLDBVersion] >= 0x0240) { … }
 
-+ (SInt32)FMDBVersion {
++ (SInt32)ZLDBVersion {
     
     // we go through these hoops so that we only have to change the version number in a single spot.
     static dispatch_once_t once;
-    static SInt32 FMDBVersionVal = 0;
+    static SInt32 ZLDBVersionVal = 0;
     
     dispatch_once(&once, ^{
-        NSString *prodVersion = [self FMDBUserVersion];
+        NSString *prodVersion = [self ZLDBUserVersion];
         
         if ([[prodVersion componentsSeparatedByString:@"."] count] < 3) {
             prodVersion = [prodVersion stringByAppendingString:@".0"];
@@ -121,11 +121,11 @@ NS_ASSUME_NONNULL_END
         NSString *junk = [prodVersion stringByReplacingOccurrencesOfString:@"." withString:@""];
         
         char *e = nil;
-        FMDBVersionVal = (int) strtoul([junk UTF8String], &e, 16);
+        ZLDBVersionVal = (int) strtoul([junk UTF8String], &e, 16);
         
     });
     
-    return FMDBVersionVal;
+    return ZLDBVersionVal;
 }
 
 #pragma mark SQLite information
@@ -256,8 +256,8 @@ NS_ASSUME_NONNULL_END
 //       C function causes problems; the rest don't. Anyway, ignoring the .m
 //       files with appledoc will prevent this problem from occurring.
 
-static int FMDBDatabaseBusyHandler(void *f, int count) {
-    FMDatabase *self = (__bridge FMDatabase*)f;
+static int ZLDBDatabaseBusyHandler(void *f, int count) {
+    ZLDatabase *self = (__bridge ZLDatabase*)f;
     
     if (count == 0) {
         self->_startBusyRetryTime = [NSDate timeIntervalSinceReferenceDate];
@@ -287,7 +287,7 @@ static int FMDBDatabaseBusyHandler(void *f, int count) {
     }
     
     if (timeout > 0) {
-        sqlite3_busy_handler(_db, &FMDBDatabaseBusyHandler, (__bridge void *)(self));
+        sqlite3_busy_handler(_db, &ZLDBDatabaseBusyHandler, (__bridge void *)(self));
     }
     else {
         // turn it off otherwise
@@ -301,18 +301,18 @@ static int FMDBDatabaseBusyHandler(void *f, int count) {
 
 
 // we no longer make busyRetryTimeout public
-// but for folks who don't bother noticing that the interface to FMDatabase changed,
+// but for folks who don't bother noticing that the interface to ZLDatabase changed,
 // we'll still implement the method so they don't get suprise crashes
 - (int)busyRetryTimeout {
     NSLog(@"%s:%d", __FUNCTION__, __LINE__);
-    NSLog(@"FMDB: busyRetryTimeout no longer works, please use maxBusyRetryTimeInterval");
+    NSLog(@"ZLDB: busyRetryTimeout no longer works, please use maxBusyRetryTimeInterval");
     return -1;
 }
 
 - (void)setBusyRetryTimeout:(int)i {
 #pragma unused(i)
     NSLog(@"%s:%d", __FUNCTION__, __LINE__);
-    NSLog(@"FMDB: setBusyRetryTimeout does nothing, please use setMaxBusyRetryTimeInterval:");
+    NSLog(@"ZLDB: setBusyRetryTimeout does nothing, please use setMaxBusyRetryTimeInterval:");
 }
 
 #pragma mark Result set functions
@@ -324,9 +324,9 @@ static int FMDBDatabaseBusyHandler(void *f, int count) {
 - (void)closeOpenResultSets {
     
     //Copy the set so we don't get mutation errors
-    NSSet *openSetCopy = FMDBReturnAutoreleased([_openResultSets copy]);
+    NSSet *openSetCopy = ZLDBReturnAutoreleased([_openResultSets copy]);
     for (NSValue *rsInWrappedInATastyValueMeal in openSetCopy) {
-        FMResultSet *rs = (FMResultSet *)[rsInWrappedInATastyValueMeal pointerValue];
+        ZLResultSet *rs = (ZLResultSet *)[rsInWrappedInATastyValueMeal pointerValue];
         
         [rs setParentDB:nil];
         [rs close];
@@ -335,7 +335,7 @@ static int FMDBDatabaseBusyHandler(void *f, int count) {
     }
 }
 
-- (void)resultSetDidClose:(FMResultSet *)resultSet {
+- (void)resultSetDidClose:(ZLResultSet *)resultSet {
     NSValue *setValue = [NSValue valueWithNonretainedObject:resultSet];
     
     [_openResultSets removeObject:setValue];
@@ -346,7 +346,7 @@ static int FMDBDatabaseBusyHandler(void *f, int count) {
 - (void)clearCachedStatements {
     
     for (NSMutableSet *statements in [_cachedStatements objectEnumerator]) {
-        for (FMStatement *statement in [statements allObjects]) {
+        for (ZLStatement *statement in [statements allObjects]) {
             [statement close];
         }
     }
@@ -354,11 +354,11 @@ static int FMDBDatabaseBusyHandler(void *f, int count) {
     [_cachedStatements removeAllObjects];
 }
 
-- (FMStatement*)cachedStatementForQuery:(NSString*)query {
+- (ZLStatement*)cachedStatementForQuery:(NSString*)query {
     
     NSMutableSet* statements = [_cachedStatements objectForKey:query];
     
-    return [[statements objectsPassingTest:^BOOL(FMStatement* statement, BOOL *stop) {
+    return [[statements objectsPassingTest:^BOOL(ZLStatement* statement, BOOL *stop) {
         
         *stop = ![statement inUse];
         return *stop;
@@ -367,7 +367,7 @@ static int FMDBDatabaseBusyHandler(void *f, int count) {
 }
 
 
-- (void)setCachedStatement:(FMStatement*)statement forQuery:(NSString*)query {
+- (void)setCachedStatement:(ZLStatement*)statement forQuery:(NSString*)query {
     
     query = [query copy]; // in case we got handed in a mutable string...
     [statement setQuery:query];
@@ -381,7 +381,7 @@ static int FMDBDatabaseBusyHandler(void *f, int count) {
     
     [_cachedStatements setObject:statements forKey:query];
     
-    FMDBRelease(query);
+    ZLDBRelease(query);
 }
 
 #pragma mark Key routines
@@ -437,10 +437,10 @@ static int FMDBDatabaseBusyHandler(void *f, int count) {
 
 + (NSDateFormatter *)storeableDateFormat:(NSString *)format {
     
-    NSDateFormatter *result = FMDBReturnAutoreleased([[NSDateFormatter alloc] init]);
+    NSDateFormatter *result = ZLDBReturnAutoreleased([[NSDateFormatter alloc] init]);
     result.dateFormat = format;
     result.timeZone = [NSTimeZone timeZoneForSecondsFromGMT:0];
-    result.locale = FMDBReturnAutoreleased([[NSLocale alloc] initWithLocaleIdentifier:@"en_US"]);
+    result.locale = ZLDBReturnAutoreleased([[NSLocale alloc] initWithLocaleIdentifier:@"en_US"]);
     return result;
 }
 
@@ -450,8 +450,8 @@ static int FMDBDatabaseBusyHandler(void *f, int count) {
 }
 
 - (void)setDateFormat:(NSDateFormatter *)format {
-    FMDBAutorelease(_dateFormat);
-    _dateFormat = FMDBReturnRetained(format);
+    ZLDBAutorelease(_dateFormat);
+    _dateFormat = ZLDBReturnRetained(format);
 }
 
 - (NSDate *)dateFromString:(NSString *)s {
@@ -470,7 +470,7 @@ static int FMDBDatabaseBusyHandler(void *f, int count) {
         return NO;
     }
     
-    FMResultSet *rs = [self executeQuery:@"select name from sqlite_master where type='table'"];
+    ZLResultSet *rs = [self executeQuery:@"select name from sqlite_master where type='table'"];
     
     if (rs) {
         [rs close];
@@ -481,11 +481,11 @@ static int FMDBDatabaseBusyHandler(void *f, int count) {
 }
 
 - (void)warnInUse {
-    NSLog(@"The FMDatabase %@ is currently in use.", self);
+    NSLog(@"The ZLDatabase %@ is currently in use.", self);
     
 #ifndef NS_BLOCK_ASSERTIONS
     if (_crashOnErrors) {
-        NSAssert(false, @"The FMDatabase %@ is currently in use.", self);
+        NSAssert(false, @"The ZLDatabase %@ is currently in use.", self);
         abort();
     }
 #endif
@@ -495,11 +495,11 @@ static int FMDBDatabaseBusyHandler(void *f, int count) {
     
     if (!_db) {
         
-        NSLog(@"The FMDatabase %@ is not open.", self);
+        NSLog(@"The ZLDatabase %@ is not open.", self);
         
 #ifndef NS_BLOCK_ASSERTIONS
         if (_crashOnErrors) {
-            NSAssert(false, @"The FMDatabase %@ is not open.", self);
+            NSAssert(false, @"The ZLDatabase %@ is not open.", self);
             abort();
         }
 #endif
@@ -533,7 +533,7 @@ static int FMDBDatabaseBusyHandler(void *f, int count) {
 - (NSError*)errorWithMessage:(NSString *)message {
     NSDictionary* errorMessage = [NSDictionary dictionaryWithObject:message forKey:NSLocalizedDescriptionKey];
     
-    return [NSError errorWithDomain:@"FMDatabase" code:sqlite3_errcode(_db) userInfo:errorMessage];
+    return [NSError errorWithDomain:@"ZLDatabase" code:sqlite3_errcode(_db) userInfo:errorMessage];
 }
 
 - (NSError*)lastError {
@@ -769,11 +769,11 @@ static int FMDBDatabaseBusyHandler(void *f, int count) {
 
 #pragma mark Execute queries
 
-- (FMResultSet *)executeQuery:(NSString *)sql withParameterDictionary:(NSDictionary *)arguments {
+- (ZLResultSet *)executeQuery:(NSString *)sql withParameterDictionary:(NSDictionary *)arguments {
     return [self executeQuery:sql withArgumentsInArray:nil orDictionary:arguments orVAList:nil];
 }
 
-- (FMResultSet *)executeQuery:(NSString *)sql withArgumentsInArray:(NSArray*)arrayArgs orDictionary:(NSDictionary *)dictionaryArgs orVAList:(va_list)args {
+- (ZLResultSet *)executeQuery:(NSString *)sql withArgumentsInArray:(NSArray*)arrayArgs orDictionary:(NSDictionary *)dictionaryArgs orVAList:(va_list)args {
     
     if (![self databaseExists]) {
         return 0x00;
@@ -788,8 +788,8 @@ static int FMDBDatabaseBusyHandler(void *f, int count) {
     
     int rc                  = 0x00;
     sqlite3_stmt *pStmt     = 0x00;
-    FMStatement *statement  = 0x00;
-    FMResultSet *rs         = 0x00;
+    ZLStatement *statement  = 0x00;
+    ZLResultSet *rs         = 0x00;
     
     if (_traceExecution && sql) {
         NSLog(@"%@ executeQuery: %@", self, sql);
@@ -842,7 +842,7 @@ static int FMDBDatabaseBusyHandler(void *f, int count) {
             // Get the index for the parameter name.
             int namedIdx = sqlite3_bind_parameter_index(pStmt, [parameterName UTF8String]);
             
-            FMDBRelease(parameterName);
+            ZLDBRelease(parameterName);
             
             if (namedIdx > 0) {
                 // Standard binding from here.
@@ -892,10 +892,10 @@ static int FMDBDatabaseBusyHandler(void *f, int count) {
         return nil;
     }
     
-    FMDBRetain(statement); // to balance the release below
+    ZLDBRetain(statement); // to balance the release below
     
     if (!statement) {
-        statement = [[FMStatement alloc] init];
+        statement = [[ZLStatement alloc] init];
         [statement setStatement:pStmt];
         
         if (_shouldCacheStatements && sql) {
@@ -904,7 +904,7 @@ static int FMDBDatabaseBusyHandler(void *f, int count) {
     }
     
     // the statement gets closed in rs's dealloc or [rs close];
-    rs = [FMResultSet resultSetWithStatement:statement usingParentDatabase:self];
+    rs = [ZLResultSet resultSetWithStatement:statement usingParentDatabase:self];
     [rs setQuery:sql];
     
     NSValue *openResultSet = [NSValue valueWithNonretainedObject:rs];
@@ -912,14 +912,14 @@ static int FMDBDatabaseBusyHandler(void *f, int count) {
     
     [statement setUseCount:[statement useCount] + 1];
     
-    FMDBRelease(statement);
+    ZLDBRelease(statement);
     
     _isExecutingStatement = NO;
     
     return rs;
 }
 
-- (FMResultSet *)executeQuery:(NSString*)sql, ... {
+- (ZLResultSet *)executeQuery:(NSString*)sql, ... {
     va_list args;
     va_start(args, sql);
     
@@ -929,7 +929,7 @@ static int FMDBDatabaseBusyHandler(void *f, int count) {
     return result;
 }
 
-- (FMResultSet *)executeQueryWithFormat:(NSString*)format, ... {
+- (ZLResultSet *)executeQueryWithFormat:(NSString*)format, ... {
     va_list args;
     va_start(args, format);
     
@@ -942,19 +942,19 @@ static int FMDBDatabaseBusyHandler(void *f, int count) {
     return [self executeQuery:sql withArgumentsInArray:arguments];
 }
 
-- (FMResultSet *)executeQuery:(NSString *)sql withArgumentsInArray:(NSArray *)arguments {
+- (ZLResultSet *)executeQuery:(NSString *)sql withArgumentsInArray:(NSArray *)arguments {
     return [self executeQuery:sql withArgumentsInArray:arguments orDictionary:nil orVAList:nil];
 }
 
-- (FMResultSet *)executeQuery:(NSString *)sql values:(NSArray *)values error:(NSError * __autoreleasing *)error {
-    FMResultSet *rs = [self executeQuery:sql withArgumentsInArray:values orDictionary:nil orVAList:nil];
+- (ZLResultSet *)executeQuery:(NSString *)sql values:(NSArray *)values error:(NSError * __autoreleasing *)error {
+    ZLResultSet *rs = [self executeQuery:sql withArgumentsInArray:values orDictionary:nil orVAList:nil];
     if (!rs && error) {
         *error = [self lastError];
     }
     return rs;
 }
 
-- (FMResultSet *)executeQuery:(NSString*)sql withVAList:(va_list)args {
+- (ZLResultSet *)executeQuery:(NSString*)sql withVAList:(va_list)args {
     return [self executeQuery:sql withArgumentsInArray:nil orDictionary:nil orVAList:args];
 }
 
@@ -975,7 +975,7 @@ static int FMDBDatabaseBusyHandler(void *f, int count) {
     
     int rc                   = 0x00;
     sqlite3_stmt *pStmt      = 0x00;
-    FMStatement *cachedStmt  = 0x00;
+    ZLStatement *cachedStmt  = 0x00;
     
     if (_traceExecution && sql) {
         NSLog(@"%@ executeUpdate: %@", self, sql);
@@ -1031,7 +1031,7 @@ static int FMDBDatabaseBusyHandler(void *f, int count) {
             // Get the index for the parameter name.
             int namedIdx = sqlite3_bind_parameter_index(pStmt, [parameterName UTF8String]);
             
-            FMDBRelease(parameterName);
+            ZLDBRelease(parameterName);
             
             if (namedIdx > 0) {
                 // Standard binding from here.
@@ -1150,13 +1150,13 @@ static int FMDBDatabaseBusyHandler(void *f, int count) {
     }
     
     if (_shouldCacheStatements && !cachedStmt) {
-        cachedStmt = [[FMStatement alloc] init];
+        cachedStmt = [[ZLStatement alloc] init];
         
         [cachedStmt setStatement:pStmt];
         
         [self setCachedStatement:cachedStmt forQuery:sql];
         
-        FMDBRelease(cachedStmt);
+        ZLDBRelease(cachedStmt);
     }
     
     int closeErrorCode;
@@ -1225,8 +1225,8 @@ static int FMDBDatabaseBusyHandler(void *f, int count) {
 }
 
 
-int FMDBExecuteBulkSQLCallback(void *theBlockAsVoid, int columns, char **values, char **names); // shhh clang.
-int FMDBExecuteBulkSQLCallback(void *theBlockAsVoid, int columns, char **values, char **names) {
+int ZLDBExecuteBulkSQLCallback(void *theBlockAsVoid, int columns, char **values, char **names); // shhh clang.
+int ZLDBExecuteBulkSQLCallback(void *theBlockAsVoid, int columns, char **values, char **names) {
     
     if (!theBlockAsVoid) {
         return SQLITE_OK;
@@ -1249,12 +1249,12 @@ int FMDBExecuteBulkSQLCallback(void *theBlockAsVoid, int columns, char **values,
     return [self executeStatements:sql withResultBlock:nil];
 }
 
-- (BOOL)executeStatements:(NSString *)sql withResultBlock:(FMDBExecuteStatementsCallbackBlock)block {
+- (BOOL)executeStatements:(NSString *)sql withResultBlock:(ZLDBExecuteStatementsCallbackBlock)block {
     
     int rc;
     char *errmsg = nil;
     
-    rc = sqlite3_exec([self sqliteHandle], [sql UTF8String], block ? FMDBExecuteBulkSQLCallback : nil, (__bridge void *)(block), &errmsg);
+    rc = sqlite3_exec([self sqliteHandle], [sql UTF8String], block ? ZLDBExecuteBulkSQLCallback : nil, (__bridge void *)(block), &errmsg);
     
     if (errmsg && [self logsErrors]) {
         NSLog(@"Error inserting batch: %s", errmsg);
@@ -1345,7 +1345,7 @@ int FMDBExecuteBulkSQLCallback(void *theBlockAsVoid, int columns, char **values,
     return NO;
 }
 
-static NSString *FMDBEscapeSavePointName(NSString *savepointName) {
+static NSString *ZLDBEscapeSavePointName(NSString *savepointName) {
     return [savepointName stringByReplacingOccurrencesOfString:@"'" withString:@"''"];
 }
 
@@ -1353,7 +1353,7 @@ static NSString *FMDBEscapeSavePointName(NSString *savepointName) {
 #if SQLITE_VERSION_NUMBER >= 3007000
     NSParameterAssert(name);
     
-    NSString *sql = [NSString stringWithFormat:@"savepoint '%@';", FMDBEscapeSavePointName(name)];
+    NSString *sql = [NSString stringWithFormat:@"savepoint '%@';", ZLDBEscapeSavePointName(name)];
     
     return [self executeUpdate:sql error:outErr withArgumentsInArray:nil orDictionary:nil orVAList:nil];
 #else
@@ -1367,7 +1367,7 @@ static NSString *FMDBEscapeSavePointName(NSString *savepointName) {
 #if SQLITE_VERSION_NUMBER >= 3007000
     NSParameterAssert(name);
     
-    NSString *sql = [NSString stringWithFormat:@"release savepoint '%@';", FMDBEscapeSavePointName(name)];
+    NSString *sql = [NSString stringWithFormat:@"release savepoint '%@';", ZLDBEscapeSavePointName(name)];
 
     return [self executeUpdate:sql error:outErr withArgumentsInArray:nil orDictionary:nil orVAList:nil];
 #else
@@ -1381,7 +1381,7 @@ static NSString *FMDBEscapeSavePointName(NSString *savepointName) {
 #if SQLITE_VERSION_NUMBER >= 3007000
     NSParameterAssert(name);
     
-    NSString *sql = [NSString stringWithFormat:@"rollback transaction to savepoint '%@';", FMDBEscapeSavePointName(name)];
+    NSString *sql = [NSString stringWithFormat:@"rollback transaction to savepoint '%@';", ZLDBEscapeSavePointName(name)];
 
     return [self executeUpdate:sql error:outErr withArgumentsInArray:nil orDictionary:nil orVAList:nil];
 #else
@@ -1419,7 +1419,7 @@ static NSString *FMDBEscapeSavePointName(NSString *savepointName) {
 #else
     NSString *errorMessage = NSLocalizedString(@"Save point functions require SQLite 3.7", nil);
     if (self.logsErrors) NSLog(@"%@", errorMessage);
-    return [NSError errorWithDomain:@"FMDatabase" code:0 userInfo:@{NSLocalizedDescriptionKey : errorMessage}];
+    return [NSError errorWithDomain:@"ZLDatabase" code:0 userInfo:@{NSLocalizedDescriptionKey : errorMessage}];
 #endif
 }
 
@@ -1445,8 +1445,8 @@ static NSString *FMDBEscapeSavePointName(NSString *savepointName) {
 
 #pragma mark Callback function
 
-void FMDBBlockSQLiteCallBackFunction(sqlite3_context *context, int argc, sqlite3_value **argv); // -Wmissing-prototypes
-void FMDBBlockSQLiteCallBackFunction(sqlite3_context *context, int argc, sqlite3_value **argv) {
+void ZLDBBlockSQLiteCallBackFunction(sqlite3_context *context, int argc, sqlite3_value **argv); // -Wmissing-prototypes
+void ZLDBBlockSQLiteCallBackFunction(sqlite3_context *context, int argc, sqlite3_value **argv) {
 #if ! __has_feature(objc_arc)
     void (^block)(sqlite3_context *context, int argc, sqlite3_value **argv) = (id)sqlite3_user_data(context);
 #else
@@ -1471,15 +1471,15 @@ void FMDBBlockSQLiteCallBackFunction(sqlite3_context *context, int argc, sqlite3
         _openFunctions = [NSMutableSet new];
     }
     
-    id b = FMDBReturnAutoreleased([block copy]);
+    id b = ZLDBReturnAutoreleased([block copy]);
     
     [_openFunctions addObject:b];
     
     /* I tried adding custom functions to release the block when the connection is destroyed- but they seemed to never be called, so we use _openFunctions to store the values instead. */
 #if ! __has_feature(objc_arc)
-    sqlite3_create_function([self sqliteHandle], [name UTF8String], arguments, SQLITE_UTF8, (void*)b, &FMDBBlockSQLiteCallBackFunction, 0x00, 0x00);
+    sqlite3_create_function([self sqliteHandle], [name UTF8String], arguments, SQLITE_UTF8, (void*)b, &ZLDBBlockSQLiteCallBackFunction, 0x00, 0x00);
 #else
-    sqlite3_create_function([self sqliteHandle], [name UTF8String], arguments, SQLITE_UTF8, (__bridge void*)b, &FMDBBlockSQLiteCallBackFunction, 0x00, 0x00);
+    sqlite3_create_function([self sqliteHandle], [name UTF8String], arguments, SQLITE_UTF8, (__bridge void*)b, &ZLDBBlockSQLiteCallBackFunction, 0x00, 0x00);
 #endif
 }
 
@@ -1554,7 +1554,7 @@ void FMDBBlockSQLiteCallBackFunction(sqlite3_context *context, int argc, sqlite3
 
 
 
-@implementation FMStatement
+@implementation ZLStatement
 
 #if ! __has_feature(objc_arc)
 - (void)finalize {
@@ -1565,7 +1565,7 @@ void FMDBBlockSQLiteCallBackFunction(sqlite3_context *context, int argc, sqlite3
 
 - (void)dealloc {
     [self close];
-    FMDBRelease(_query);
+    ZLDBRelease(_query);
 #if ! __has_feature(objc_arc)
     [super dealloc];
 #endif

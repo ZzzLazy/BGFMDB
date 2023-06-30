@@ -14,19 +14,19 @@ NS_ASSUME_NONNULL_BEGIN
 #endif
 #endif
 
-@class FMDatabase;
-@class FMStatement;
+@class ZLDatabase;
+@class ZLStatement;
 
-/** Represents the results of executing a query on an `<FMDatabase>`.
+/** Represents the results of executing a query on an `<ZLDatabase>`.
  
  ### See also
  
- - `<FMDatabase>`
+ - `<ZLDatabase>`
  */
 
-@interface FMResultSet : NSObject
+@interface ZLResultSet : NSObject
 
-@property (nonatomic, retain, nullable) FMDatabase *parentDB;
+@property (nonatomic, retain, nullable) ZLDatabase *parentDB;
 
 ///-----------------
 /// @name Properties
@@ -40,24 +40,24 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (readonly) NSMutableDictionary *columnNameToIndexMap;
 
-/** `FMStatement` used by result set. */
+/** `ZLStatement` used by result set. */
 
-@property (atomic, retain, nullable) FMStatement *statement;
+@property (atomic, retain, nullable) ZLStatement *statement;
 
 ///------------------------------------
 /// @name Creating and closing database
 ///------------------------------------
 
-/** Create result set from `<FMStatement>`
+/** Create result set from `<ZLStatement>`
  
- @param statement A `<FMStatement>` to be performed
+ @param statement A `<ZLStatement>` to be performed
  
- @param aDB A `<FMDatabase>` to be used
+ @param aDB A `<ZLDatabase>` to be used
  
- @return A `FMResultSet` on success; `nil` on failure
+ @return A `ZLResultSet` on success; `nil` on failure
  */
 
-+ (instancetype)resultSetWithStatement:(FMStatement *)statement usingParentDatabase:(FMDatabase*)aDB;
++ (instancetype)resultSetWithStatement:(ZLStatement *)statement usingParentDatabase:(ZLDatabase*)aDB;
 
 /** Close result set */
 

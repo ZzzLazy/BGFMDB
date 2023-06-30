@@ -1,15 +1,15 @@
 //
-//  FMDatabaseQueue.m
+//  ZLDatabaseQueue.m
 //  fmdb
 //
 //  Created by August Mueller on 6/22/11.
 //  Copyright 2011 Flying Meat Inc. All rights reserved.
 //
 
-#import "FMDatabaseQueue.h"
-#import "FMDatabase.h"
+#import "ZLDatabaseQueue.h"
+#import "ZLDatabase.h"
 
-#if FMDB_SQLITE_STANDALONE
+#if ZLDB_SQLITE_STANDALONE
 #import <sqlite3/sqlite3.h>
 #else
 #import <sqlite3.h>
@@ -18,30 +18,30 @@
 /*
  
  Note: we call [self retain]; before using dispatch_sync, just incase 
- FMDatabaseQueue is released on another thread and we're in the middle of doing
+ ZLDatabaseQueue is released on another thread and we're in the middle of doing
  something in dispatch_sync
  
  */
 
 /*
- * A key used to associate the FMDatabaseQueue object with the dispatch_queue_t it uses.
+ * A key used to associate the ZLDatabaseQueue object with the dispatch_queue_t it uses.
  * This in turn is used for deadlock detection by seeing if inDatabase: is called on
  * the queue's dispatch queue, which should not happen and causes a deadlock.
  */
 static const void * const kDispatchQueueSpecificKey = &kDispatchQueueSpecificKey;
 
-@interface FMDatabaseQueue () {
+@interface ZLDatabaseQueue () {
     dispatch_queue_t    _queue;
-    FMDatabase          *_db;
+    ZLDatabase          *_db;
 }
 @end
 
-@implementation FMDatabaseQueue
+@implementation ZLDatabaseQueue
 
 + (instancetype)databaseQueueWithPath:(NSString *)aPath {
-    FMDatabaseQueue *q = [[self alloc] initWithPath:aPath];
+    ZLDatabaseQueue *q = [[self alloc] initWithPath:aPath];
     
-    FMDBAutorelease(q);
+    ZLDBAutorelease(q);
     
     return q;
 }
@@ -51,9 +51,9 @@ static const void * const kDispatchQueueSpecificKey = &kDispatchQueueSpecificKey
 }
 
 + (instancetype)databaseQueueWithPath:(NSString *)aPath flags:(int)openFlags {
-    FMDatabaseQueue *q = [[self alloc] initWithPath:aPath flags:openFlags];
+    ZLDatabaseQueue *q = [[self alloc] initWithPath:aPath flags:openFlags];
     
-    FMDBAutorelease(q);
+    ZLDBAutorelease(q);
     
     return q;
 }
@@ -63,7 +63,7 @@ static const void * const kDispatchQueueSpecificKey = &kDispatchQueueSpecificKey
 }
 
 + (Class)databaseClass {
-    return [FMDatabase class];
+    return [ZLDatabase class];
 }
 
 - (instancetype)initWithURL:(NSURL *)url flags:(int)openFlags vfs:(NSString *)vfsName {
@@ -76,7 +76,7 @@ static const void * const kDispatchQueueSpecificKey = &kDispatchQueueSpecificKey
     if (self != nil) {
         
         _db = [[[self class] databaseClass] databaseWithPath:aPath];
-        FMDBRetain(_db);
+        ZLDBRetain(_db);
         
 #if SQLITE_VERSION_NUMBER >= 3005000
         BOOL success = [_db openWithFlags:openFlags vfs:vfsName];
@@ -85,11 +85,11 @@ static const void * const kDispatchQueueSpecificKey = &kDispatchQueueSpecificKey
 #endif
         if (!success) {
             NSLog(@"Could not create database queue for path %@", aPath);
-            FMDBRelease(self);
+            ZLDBRelease(self);
             return 0x00;
         }
         
-        _path = FMDBReturnRetained(aPath);
+        _path = ZLDBReturnRetained(aPath);
         
         _queue = dispatch_queue_create([[NSString stringWithFormat:@"fmdb.%@", self] UTF8String], NULL);
         dispatch_queue_set_specific(_queue, kDispatchQueueSpecificKey, (__bridge void *)self, NULL);
@@ -123,12 +123,12 @@ static const void * const kDispatchQueueSpecificKey = &kDispatchQueueSpecificKey
 
     
 - (void)dealloc {
-    FMDBRelease(_db);
-    FMDBRelease(_path);
-    FMDBRelease(_vfsName);
+    ZLDBRelease(_db);
+    ZLDBRelease(_path);
+    ZLDBRelease(_vfsName);
     
     if (_queue) {
-        FMDBDispatchQueueRelease(_queue);
+        ZLDBDispatchQueueRelease(_queue);
         _queue = 0x00;
     }
 #if ! __has_feature(objc_arc)
@@ -137,22 +137,22 @@ static const void * const kDispatchQueueSpecificKey = &kDispatchQueueSpecificKey
 }
 
 - (void)close {
-    FMDBRetain(self);
+    ZLDBRetain(self);
     dispatch_sync(_queue, ^() {
         [self->_db close];
-        FMDBRelease(_db);
+        ZLDBRelease(_db);
         self->_db = 0x00;
     });
-    FMDBRelease(self);
+    ZLDBRelease(self);
 }
 
 - (void)interrupt {
     [[self database] interrupt];
 }
 
-- (FMDatabase*)database {
+- (ZLDatabase*)database {
     if (!_db) {
-       _db = FMDBReturnRetained([[[self class] databaseClass] databaseWithPath:_path]);
+       _db = ZLDBReturnRetained([[[self class] databaseClass] databaseWithPath:_path]);
         
 #if SQLITE_VERSION_NUMBER >= 3005000
         BOOL success = [_db openWithFlags:_openFlags vfs:_vfsName];
@@ -160,8 +160,8 @@ static const void * const kDispatchQueueSpecificKey = &kDispatchQueueSpecificKey
         BOOL success = [_db open];
 #endif
         if (!success) {
-            NSLog(@"FMDatabaseQueue could not reopen database for path %@", _path);
-            FMDBRelease(_db);
+            NSLog(@"ZLDatabaseQueue could not reopen database for path %@", _path);
+            ZLDBRelease(_db);
             _db  = 0x00;
             return 0x00;
         }
@@ -170,39 +170,39 @@ static const void * const kDispatchQueueSpecificKey = &kDispatchQueueSpecificKey
     return _db;
 }
 
-- (void)inDatabase:(void (^)(FMDatabase *db))block {
+- (void)inDatabase:(void (^)(ZLDatabase *db))block {
 #ifndef NDEBUG
     /* Get the currently executing queue (which should probably be nil, but in theory could be another DB queue
      * and then check it against self to make sure we're not about to deadlock. */
-    FMDatabaseQueue *currentSyncQueue = (__bridge id)dispatch_get_specific(kDispatchQueueSpecificKey);
+    ZLDatabaseQueue *currentSyncQueue = (__bridge id)dispatch_get_specific(kDispatchQueueSpecificKey);
     assert(currentSyncQueue != self && "inDatabase: was called reentrantly on the same queue, which would lead to a deadlock");
 #endif
     
-    FMDBRetain(self);
+    ZLDBRetain(self);
     
     dispatch_sync(_queue, ^() {
         
-        FMDatabase *db = [self database];
+        ZLDatabase *db = [self database];
         block(db);
         
         if ([db hasOpenResultSets]) {
-            NSLog(@"Warning: there is at least one open result set around after performing [FMDatabaseQueue inDatabase:]");
+            NSLog(@"Warning: there is at least one open result set around after performing [ZLDatabaseQueue inDatabase:]");
             
 #if defined(DEBUG) && DEBUG
-            NSSet *openSetCopy = FMDBReturnAutoreleased([[db valueForKey:@"_openResultSets"] copy]);
+            NSSet *openSetCopy = ZLDBReturnAutoreleased([[db valueForKey:@"_openResultSets"] copy]);
             for (NSValue *rsInWrappedInATastyValueMeal in openSetCopy) {
-                FMResultSet *rs = (FMResultSet *)[rsInWrappedInATastyValueMeal pointerValue];
+                ZLResultSet *rs = (ZLResultSet *)[rsInWrappedInATastyValueMeal pointerValue];
                 NSLog(@"query: '%@'", [rs query]);
             }
 #endif
         }
     });
     
-    FMDBRelease(self);
+    ZLDBRelease(self);
 }
 
-- (void)beginTransaction:(BOOL)useDeferred withBlock:(void (^)(FMDatabase *db, BOOL *rollback))block {
-    FMDBRetain(self);
+- (void)beginTransaction:(BOOL)useDeferred withBlock:(void (^)(ZLDatabase *db, BOOL *rollback))block {
+    ZLDBRetain(self);
     dispatch_sync(_queue, ^() { 
         
         BOOL shouldRollback = NO;
@@ -224,22 +224,22 @@ static const void * const kDispatchQueueSpecificKey = &kDispatchQueueSpecificKey
         }
     });
     
-    FMDBRelease(self);
+    ZLDBRelease(self);
 }
 
-- (void)inDeferredTransaction:(void (^)(FMDatabase *db, BOOL *rollback))block {
+- (void)inDeferredTransaction:(void (^)(ZLDatabase *db, BOOL *rollback))block {
     [self beginTransaction:YES withBlock:block];
 }
 
-- (void)inTransaction:(void (^)(FMDatabase *db, BOOL *rollback))block {
+- (void)inTransaction:(void (^)(ZLDatabase *db, BOOL *rollback))block {
     [self beginTransaction:NO withBlock:block];
 }
 
-- (NSError*)inSavePoint:(void (^)(FMDatabase *db, BOOL *rollback))block {
+- (NSError*)inSavePoint:(void (^)(ZLDatabase *db, BOOL *rollback))block {
 #if SQLITE_VERSION_NUMBER >= 3007000
     static unsigned long savePointIdx = 0;
     __block NSError *err = 0x00;
-    FMDBRetain(self);
+    ZLDBRetain(self);
     dispatch_sync(_queue, ^() { 
         
         NSString *name = [NSString stringWithFormat:@"savePoint%ld", savePointIdx++];
@@ -258,12 +258,12 @@ static const void * const kDispatchQueueSpecificKey = &kDispatchQueueSpecificKey
             
         }
     });
-    FMDBRelease(self);
+    ZLDBRelease(self);
     return err;
 #else
     NSString *errorMessage = NSLocalizedString(@"Save point functions require SQLite 3.7", nil);
     if (self.logsErrors) NSLog(@"%@", errorMessage);
-    return [NSError errorWithDomain:@"FMDatabase" code:0 userInfo:@{NSLocalizedDescriptionKey : errorMessage}];
+    return [NSError errorWithDomain:@"ZLDatabase" code:0 userInfo:@{NSLocalizedDescriptionKey : errorMessage}];
 #endif
 }
 

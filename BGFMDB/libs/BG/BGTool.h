@@ -1,6 +1,6 @@
 //
 //  BGTool.h
-//  BGFMDB
+//  BGZLDB
 //
 //  Created by huangzhibiao on 17/2/16.
 //  Copyright © 2017年 Biao. All rights reserved.

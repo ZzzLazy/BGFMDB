@@ -1,27 +1,27 @@
-#import "FMResultSet.h"
-#import "FMDatabase.h"
+#import "ZLResultSet.h"
+#import "ZLDatabase.h"
 #import "unistd.h"
 
-#if FMDB_SQLITE_STANDALONE
+#if ZLDB_SQLITE_STANDALONE
 #import <sqlite3/sqlite3.h>
 #else
 #import <sqlite3.h>
 #endif
 
-@interface FMDatabase ()
-- (void)resultSetDidClose:(FMResultSet *)resultSet;
+@interface ZLDatabase ()
+- (void)resultSetDidClose:(ZLResultSet *)resultSet;
 @end
 
-@interface FMResultSet () {
+@interface ZLResultSet () {
     NSMutableDictionary *_columnNameToIndexMap;
 }
 @end
 
-@implementation FMResultSet
+@implementation ZLResultSet
 
-+ (instancetype)resultSetWithStatement:(FMStatement *)statement usingParentDatabase:(FMDatabase*)aDB {
++ (instancetype)resultSetWithStatement:(ZLStatement *)statement usingParentDatabase:(ZLDatabase*)aDB {
     
-    FMResultSet *rs = [[FMResultSet alloc] init];
+    ZLResultSet *rs = [[ZLResultSet alloc] init];
     
     [rs setStatement:statement];
     [rs setParentDB:aDB];
@@ -29,7 +29,7 @@
     NSParameterAssert(![statement inUse]);
     [statement setInUse:YES]; // weak reference
     
-    return FMDBReturnAutoreleased(rs);
+    return ZLDBReturnAutoreleased(rs);
 }
 
 #if ! __has_feature(objc_arc)
@@ -42,10 +42,10 @@
 - (void)dealloc {
     [self close];
     
-    FMDBRelease(_query);
+    ZLDBRelease(_query);
     _query = nil;
     
-    FMDBRelease(_columnNameToIndexMap);
+    ZLDBRelease(_columnNameToIndexMap);
     _columnNameToIndexMap = nil;
     
 #if ! __has_feature(objc_arc)
@@ -55,7 +55,7 @@
 
 - (void)close {
     [_statement reset];
-    FMDBRelease(_statement);
+    ZLDBRelease(_statement);
     _statement = nil;
     
     // we don't need this anymore... (i think)
@@ -116,7 +116,7 @@
             [dict setObject:objectValue forKey:columnName];
         }
         
-        return FMDBReturnAutoreleased([dict copy]);
+        return ZLDBReturnAutoreleased([dict copy]);
     }
     else {
         NSLog(@"Warning: There seem to be no columns in this set.");
@@ -191,7 +191,7 @@
                 // If 'next' or 'nextWithError' is called after the result set is closed,
                 // we need to return the appropriate error.
                 NSDictionary* errorMessage = [NSDictionary dictionaryWithObject:@"parentDB does not exist" forKey:NSLocalizedDescriptionKey];
-                *outErr = [NSError errorWithDomain:@"FMDatabase" code:SQLITE_MISUSE userInfo:errorMessage];
+                *outErr = [NSError errorWithDomain:@"ZLDatabase" code:SQLITE_MISUSE userInfo:errorMessage];
             }
             
         }
